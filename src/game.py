@@ -28,6 +28,13 @@ class Board():
         return out.getvalue()
 
     def __getitem__(self, t):
+        """
+        Get the contents of the game board based on a tuple (i,j) to get
+        the contents of the i-th row (numbered from the bottom) and the j-th
+        column, where i and j are zero based.
+        """
+        if type(t)==int:
+            return [self.board[j][t] for j in range(self.m)]
         if len(t)==0:
             return self.board
         if len(t)==1:
@@ -41,7 +48,7 @@ class Board():
         Play a piece in the specified column.
         """
         if column < 0 or column >= self.m:
-            raise ValueError(f'Column {column} doesn\'t exist.')
+            raise IndexError(f'Column {column} doesn\'t exist.')
 
         for i in range(self.n):
             if self.board[column][i] == ' ':
