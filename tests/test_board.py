@@ -66,40 +66,40 @@ def test_board_is_full():
     assert b.is_full()
 
 
-def test_winning_move_vertical():
+def test_is_winning_move_vertical():
     b = game.Board(4,4)
     for i in range(3):
         b.play(0, 'x')
         b.play(1, 'o')
-    assert b.winning_move(2,0,'x') is False
-    assert b.winning_move(2,1,'y') is False
-    assert b.winning_move(3,1,'y') is False
+    assert b.is_winning_move(2,0,'x') is False
+    assert b.is_winning_move(2,1,'y') is False
+    assert b.is_winning_move(3,1,'y') is False
 
     b.play(0, 'x')
-    assert b.winning_move(3,0,'x')
+    assert b.is_winning_move(3,0,'x')
 
 
-def test_winning_move_horizontal():
+def test_is_winning_move_horizontal():
     b = game.Board(4,4)
     for i in range(3):
         b.play(i, 'x')
         b.play(i, 'o')
-    assert b.winning_move(0,2,'x') is False
-    assert b.winning_move(1,2,'y') is False
+    assert b.is_winning_move(0,2,'x') is False
+    assert b.is_winning_move(1,2,'y') is False
 
     b.play(3, 'x')
-    assert b.winning_move(0,3,'x')
+    assert b.is_winning_move(0,3,'x')
 
 
-def test_winning_move_diagonal():
+def test_is_winning_move_diagonal():
     b = game.Board(4,4)
     for i in range(4):
         for j in range(i):
             b.play(i, 'o')
         b.play(i, 'x')
-    assert b.winning_move(3,3,'x')
-    assert b.winning_move(0,0,'x')
-    assert b.winning_move(1,1,'x')
+    assert b.is_winning_move(3,3,'x')
+    assert b.is_winning_move(0,0,'x')
+    assert b.is_winning_move(1,1,'x')
 
 
 def test_game():
@@ -121,12 +121,40 @@ def test_game():
 def test_quit_game():
     p = game.Player('Player1', '1')
     q = game.Player('Player2', '2')
-    g = game.Game(p, q)
+    r = game.Player('Player3', '3')
+    g = game.Game(p, q, r)
 
     assert g.status == 'IN_PROGRESS'
 
     g.quit(p)
+
+    # can't play if you already quit
     with pytest.raises(ValueError):
         g.play(p, 0)
 
+    # make sure other players can play
+    g.play(q, 1)
+    g.play(r, 1)
+
+    # only 1 player left, so that player wins
+    g.quit(q)
     assert g.status == 'DONE'
+    assert g.winner == r
+
+
+def test_win_game():
+    p = game.Player('Player1', '1')
+    q = game.Player('Player2', '2')
+    g = game.Game(p, q)
+
+    for i in range(3):
+        g.play(p, 1)
+        g.play(q, 2)
+
+    assert g.status == 'IN_PROGRESS'
+
+    g.play(p, 1)
+
+    assert g.status == 'DONE'
+    assert g.winner == p
+

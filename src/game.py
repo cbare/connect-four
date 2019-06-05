@@ -13,6 +13,11 @@ class OutOfTurnError(ValueError):
     pass
 
 
+class GameOver(Exception):
+    pass
+
+
+
 class Board():
     """
     Represent a game board with _n_ rows and _m_ columns. A win requires
@@ -71,10 +76,14 @@ class Board():
 
         self.board[column][i] = token
 
+        return self.is_winning_move(i, column, token)
+
 
     def _find_win(self, i, j, token, di, dj):
         """
-
+        Helper method for is_winning_move. Asks whether the slot i,j is a
+        winning move. Is it part of k tokens in a row in the direction
+        determined by di and dj.
         """
         count = 0
 
@@ -99,7 +108,7 @@ class Board():
         return count >= self.k
 
 
-    def winning_move(self, i, j, token):
+    def is_winning_move(self, i, j, token):
         ## k in a row
         ## k in a column
         ## k in / diagonal
@@ -149,6 +158,7 @@ class Game():
         self.player_active = {player:True for player in args}
         self.turn = 0
         self.history = []
+        self.winner = None
 
     def __eq__(self, other):
         return self.id == other.id
@@ -165,12 +175,12 @@ class Game():
         """
         returns the number of active players in the game.
         """
-        return sum(active for player_id, active in self.player_active.items())
+        return sum(active for player, active in self.player_active.items())
 
 
     @property
     def status(self):
-        return 'DONE' if (self.board.is_full() or self.active_players < 2) else 'IN_PROGRESS'
+        return 'DONE' if (self.winner or self.board.is_full() or self.active_players < 2) else 'IN_PROGRESS'
 
 
     def quit(self, player):
@@ -181,11 +191,25 @@ class Game():
             raise KeyError(f'{player.name} not in {self}.')
         self.player_active[player] = False
 
+        ## if there's only one player left, that player wins
+        if self.active_players == 1:
+            for player, active in self.player_active.items():
+                if active:
+                    self.winner = player
+
+        ## if the current player quits, figure out whose turn it is
+        current_player = self.players[self.turn]
+        if player == current_player:
+            self._increment_turn()
+
 
     def play(self, player, column):
         """
         The given player places a token in the column specified.
         """
+        if self.status == 'DONE':
+            raise GameOver('Game Over')
+
         current_player = self.players[self.turn]
         if player != current_player:
             raise OutOfTurnError(f'{player.name} can\'t play right now. It\'s {current_player.name}\'s turn.')
@@ -194,12 +218,20 @@ class Game():
             raise ValueError(f'{player.name} is not an active player in the game.')
 
         ## update board
-        self.board.play(column, player.token)
+        win = self.board.play(column, player.token)
+        if win:
+            self.winner = player
 
         ## record move in history
         self.history.append((player, column))
 
-        ## next active player's turn
+        self._increment_turn()
+
+
+    def _increment_turn(self):
+        """
+        next active player's turn
+        """
         i = 1
         while i < len(self.players) and not \
               self.player_active.get(self.players[(self.turn + i) % len(self.players)], False):
