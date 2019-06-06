@@ -63,6 +63,22 @@ def test_game(client):
     assert res.json['state'] == 'DONE'
     assert res.json['winner'] == 'player1'
 
+    # Try to make a move after game is over
+    res = client.post(f'/drop_token/{game_id}/player2', json={
+        'column': 1
+        })
+    assert res.status_code == 410
+
+    ## test list-moves api
+    res = client.get(f'/drop_token/{game_id}/moves')
+    print(res.json)
+    assert 'moves' in res.json
+
+    for i, move in enumerate(res.json['moves']):
+        assert move['player'] == 'player' + str(i%2+1)
+        assert move['column'] == i%2
+        assert move['type'] == 'MOVE'
+
 
 def test_draw(client):
     ## new game
@@ -108,6 +124,14 @@ def test_quit(client):
         })
     res = client.delete(f'/drop_token/{game_id}/bat')
 
+    ## test list-moves api
+    res = client.get(f'/drop_token/{game_id}/moves')
+    print(res.json)
+    assert 'moves' in res.json
+    assert res.json['moves'][0] == {'column': 0, 'player': 'foo', 'type': 'MOVE'}
+    assert res.json['moves'][1] == {'column': 1, 'player': 'bar', 'type': 'MOVE'}
+    assert res.json['moves'][2] == {'player': 'bat', 'type': 'QUIT'}
+
     for i in range(2):
         res = client.post(f'/drop_token/{game_id}/foo', json={
             'column': 0
@@ -115,6 +139,11 @@ def test_quit(client):
         res = client.post(f'/drop_token/{game_id}/bar', json={
             'column': 1
             })
+
+    ## test list-moves api
+    res = client.get(f'/drop_token/{game_id}/moves')
+    print(res.json)
+    assert len(res.json['moves']) == 7
 
     res = client.get(f'/drop_token/{game_id}')
     print(res.json)

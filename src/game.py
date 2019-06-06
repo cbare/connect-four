@@ -6,15 +6,15 @@ import uuid
 
 
 class ColumnFullException(Exception):
-    pass
+    status_code = 400
 
 
 class OutOfTurnError(ValueError):
-    pass
+    status_code = 409
 
 
 class GameOver(Exception):
-    pass
+    status_code = 410
 
 
 
@@ -178,6 +178,9 @@ class Game():
 
     @property
     def status(self):
+        """
+        Is the game DONE or still IN_PROGRESS?
+        """
         return 'DONE' if (self.winner or self.board.is_full() or self.active_players < 2) else 'IN_PROGRESS'
 
 
@@ -185,9 +188,15 @@ class Game():
         """
         The specified player quits the game.
         """
+        if self.status == 'DONE':
+            raise GameOver('Can\'t quit. Game is over.')
+
         if player not in self.player_active:
             raise KeyError(f'{player.name} not in {self}.')
         self.player_active[player] = False
+
+        ## record quitting in history as column -1
+        self.history.append((player, -1))
 
         ## if there's only one player left, that player wins
         if self.active_players == 1:
