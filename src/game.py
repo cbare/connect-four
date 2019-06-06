@@ -52,8 +52,6 @@ class Board():
         """
         if type(t)==int:
             return [self.board[j][t] for j in range(self.m)]
-        if len(t)==0:
-            return self.board
         if len(t)==1:
             return [self.board[j][t[0]] for j in range(self.m)]
         if len(t)==2:
@@ -122,7 +120,7 @@ class Board():
     def is_full(self):
         for i in range(self.n):
             for j in range(self.m):
-                if self[j,i] == ' ':
+                if self[i,j] == ' ':
                     return False
         return True
 
@@ -133,7 +131,7 @@ class Player():
         if (not name):
             raise ValueError('Give the player a non-empty name')
         self.name = name
-        self.id = player_id if player_id else uuid.uuid4()
+        self.id = player_id if player_id else name
         self.token = token if token else name[0]
 
     def __eq__(self, other):
@@ -152,7 +150,7 @@ class Game():
     A game of connect-four, with a board and a list of players.
     """
     def __init__(self, *args, n=4, m=4):
-        self.id = uuid.uuid4()
+        self.id = str(uuid.uuid4())
         self.board = Board(n, m)
         self.players = args
         self.player_active = {player:True for player in args}
@@ -226,6 +224,9 @@ class Game():
         self.history.append((player, column))
 
         self._increment_turn()
+
+        # return move number
+        return len(self.history)-1
 
 
     def _increment_turn(self):

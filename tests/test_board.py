@@ -49,19 +49,18 @@ def test_board_error_handling():
 
 
 def test_board_is_full():
-    b = game.Board(2,2)
+    b = game.Board(3,2)
 
     assert not b.is_full()
+
+    for i in range(2):
+        b.play(1, 'r')
+        assert not b.is_full()
+        b.play(0, 'b')
+        assert not b.is_full()
 
     b.play(1, 'r')
     assert not b.is_full()
-
-    b.play(1, 'r')
-    assert not b.is_full()
-
-    b.play(0, 'b')
-    assert not b.is_full()
-
     b.play(0, 'b')
     assert b.is_full()
 
@@ -110,12 +109,14 @@ def test_game():
     with pytest.raises(game.OutOfTurnError):
         g.play(q, 0)
 
-    g.play(p, 0)
+    move_number = g.play(p, 0)
+    assert move_number == 0
 
     with pytest.raises(game.OutOfTurnError):
         g.play(p, 0)
 
-    g.play(q, 0)
+    move_number = g.play(q, 0)
+    assert move_number == 1
 
 
 def test_quit_game():
