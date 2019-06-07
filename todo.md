@@ -29,6 +29,5 @@
   - [x] exceptions to proper http error codes
   - [x] proper comment headers
   - [x] ensure that players in a game have unique tokens
-  - [ ] rename test_board
-  - [ ] split game or rename to model.py?
-  - [ ] home - reasonable response to root URL
+  - [x] rename test_board
+  - [x] home - reasonable response to root URL
