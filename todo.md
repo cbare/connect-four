@@ -7,9 +7,11 @@
 
 ## Infra
   [x] In-memory store w/ suggested alternate implementations
+  [x] Docker container
+  [ ] Serve via GUnicorn
   [ ] Type annotations
-  [ ] Docker container
   [ ] Generate API docs
+  [ ] Login / auth via JWT
 
 ## API
   [x] GET /drop_token - Return all in-progress games.

@@ -1,4 +1,5 @@
 """
+REST API for connent-four game.
 """
 import store
 from game import ColumnFullException, OutOfTurnError, GameOver
@@ -123,15 +124,21 @@ def home():
         })
 
 
-## Return all in-progress games or create a new game.
 @app.route('/drop_token')
 def list_games():
+    """
+    Return all in-progress games or create a new game.
+    """
     return jsonify({'games': store.list_games()})
 
 
-## Create a new game.
 @app.route('/drop_token', methods=['POST'])
 def new_game():
+    """
+    Create a new game and returns gameId in the response body.
+
+    Accepts a JSON body with the schema GAME_SCHEMA.
+    """
     data = request.get_json()
     validate(data, GAME_SCHEMA)
 
@@ -144,9 +151,11 @@ def new_game():
         })
 
 
-## GET the state of the game.
 @app.route('/drop_token/<game_id>')
 def get_game(game_id):
+    """
+    GET the state of the game.
+    """
     game = _get_game(game_id)
     output = {
         "players" : [player.id for player in game.players],

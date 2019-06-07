@@ -10,7 +10,7 @@ An api for playing the game connect-four.
 The flask web service can be run for local development with this command:
 
 ```
-PYTHONPATH=`pwd`/src FLASK_APP=api.py flask run
+PYTHONPATH=`pwd`/src FLASK_APP=api.py flask run --reload
 ```
 
 
@@ -27,4 +27,3 @@ To see output of tests, add the -s flag:
 ```
 PYTHONPATH=`pwd`/src py.test -vs tests/
 ```
-

@@ -1,4 +1,8 @@
 """
+Model classes for connect-four game.
+
+A game of connect-four is represented by an instance of Game, which
+has a Board of some dimensions (n,m) and a list of Players.
 """
 import io
 import uuid
@@ -80,8 +84,8 @@ class Board():
     def _find_win(self, i, j, token, di, dj):
         """
         Helper method for is_winning_move. Asks whether the slot i,j is a
-        winning move. Is it part of k tokens in a row in the direction
-        determined by di and dj.
+        winning move. In other words, is it part of k tokens in a row in the
+        direction determined by di and dj?
         """
         count = 0
 
@@ -107,10 +111,15 @@ class Board():
 
 
     def is_winning_move(self, i, j, token):
-        ## k in a row
-        ## k in a column
-        ## k in / diagonal
-        ## k in \ diagonal
+        """
+        Has the game been won by playing a token at position (i,j)?
+
+        Conditions for a win:
+         * k in a row
+         * k in a column
+         * k in / diagonal
+         * k in \ diagonal
+        """
         return self._find_win(i, j, token, di=0, dj=1)  \
             or self._find_win(i, j, token, di=1, dj=0)  \
             or self._find_win(i, j, token, di=1, dj=1)  \
@@ -118,6 +127,10 @@ class Board():
 
 
     def is_full(self):
+        """
+        Return true if the game board is completely full of tokens. If no
+        player has won by this point, then the game is a draw.
+        """
         for i in range(self.n):
             for j in range(self.m):
                 if self[i,j] == ' ':
