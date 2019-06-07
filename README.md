@@ -45,3 +45,9 @@ To see output of tests, add the -s flag:
 ```
 PYTHONPATH=`pwd`/src py.test -vs
 ```
+
+## Configuration
+
+This code has been tested on:
+ * MacOS 10.14.5 & Python 3.7.0
+ * Amazon Linux AMI release 2018.03 & Python 3.6.8
