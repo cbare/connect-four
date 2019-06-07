@@ -85,9 +85,42 @@ def _history_to_dict(history):
 #  Routes
 #----------------------------------------------------------------------
 
+# The root URL documents the API and points callers to the available
+# resources.
+#
+# Note that API might benefit from revising the endpoints to be more
+# resource oriented. For example,
+#
+# resource: /drop_token/games{/gameId}
+#           GET: list available games
+#           GET w/ gameId: get individual game
+#           POST: start new game
+#           DELETE w/ gameId: end game
+#
+# resource: /drop_token/games/{gameId}/moves{/moveId}
+#           GET: list history of moves in game
+#           GET w/ moveId: get individual move
+#           POST: make a move, playerId and column in body
+#
+# resource: /drop_token/games/{gameId}/players{/playerId}
+#           GET: list players in game
+#           GET w/ playerId: get individual player
+#           DELETE w/ playerId: player leaves game
 @app.route('/')
 def home():
-    return jsonify({'message': 'Hello, World!'})
+    """
+    API home.
+    """
+    return jsonify({
+        'message': 'Welcome to the connect-four API!',
+        'version': '0.0.1',
+        'endpoints': {
+                'game': '/drop_token',
+                'move': '/drop_token/{gameId}/moves{/moveId}',
+                'post_move': '/drop_token/{gameId}/{playerId}',
+                'delete_player': '/drop_token/{gameId}/{playerId}',
+            }
+        })
 
 
 ## Return all in-progress games or create a new game.
