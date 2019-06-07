@@ -140,10 +140,22 @@ def test_quit(client):
             'column': 1
             })
 
-    ## test list-moves api
+    ## list moves
     res = client.get(f'/drop_token/{game_id}/moves')
     print(res.json)
     assert len(res.json['moves']) == 7
+
+    ## partial list moves
+    res = client.get(f'/drop_token/{game_id}/moves?start=0&until=4')
+    print(res.json)
+    assert len(res.json['moves']) == 4
+
+    ## get individual moves
+    res = client.get(f'/drop_token/{game_id}/moves/1')
+    assert res.json['type'] == 'MOVE'
+
+    res = client.get(f'/drop_token/{game_id}/moves/2')
+    assert res.json['type'] == 'QUIT'
 
     res = client.get(f'/drop_token/{game_id}')
     print(res.json)

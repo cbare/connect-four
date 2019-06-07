@@ -62,15 +62,21 @@ def _get_player(player_id):
         raise ClientError(error, status_code=404)
 
 
+def _move_to_dict(player, column):
+    """
+    Turn a move into a dictionary
+    """
+    return \
+        {'type': 'QUIT', 'player': player.id} if column < 0 else \
+        {'type': 'MOVE', 'player': player.id, 'column': column}
+
+
 def _history_to_dict(history):
     """
     Turn list of moves into a dictionary
     """
     return {
-        'moves': [
-            {'type': 'QUIT', 'player': player.id} if col < 0 else \
-            {'type': 'MOVE', 'player': player.id, 'column': col} \
-                for player, col in history]
+        'moves': [_move_to_dict(player, column) for player, column in history]
     }
 
 
@@ -125,32 +131,36 @@ def list_moves(game_id):
     """
     game = _get_game(game_id)
 
-    start = request.args.get('start', 0)
-    until = request.args.get('until', None)
+    start = int(request.args.get('start', 0))
+    until = int(request.args['until']) if 'until' in request.args else None
+
+    if start < 0 or (until and until <= start):
+        raise ClientError(f'Invalid range of moves ({start}, {until}).', status_code=404)
+
     return jsonify(_history_to_dict(game.history[start:until]))
 
 
-## GET a move.
 @app.route('/drop_token/<game_id>/moves/<int:move_number>')
 def get_move(game_id, move_number):
+    """
+    GET a move.
+    """
     game = _get_game(game_id)
 
-    if move_number < 0 or move_number > len(game.history):
-        raise ValueError(f'Move number {move_number} does not exist.')
+    if move_number < 0 or move_number >= len(game.history):
+        raise ClientError(f'Move number {move_number} does not exist.', status_code=404)
 
     player, column = game.history[move_number]
 
-    return jsonify({
-            'type': 'MOVE',
-            'player': player.id,
-            'column': column
-        })
+    return jsonify(_move_to_dict(player, column))
 
 
 @app.route('/drop_token/<game_id>/<player_id>', methods=['POST'])
 def play_move(game_id, player_id):
     """
-    POST a move
+    POST a move. Accepts a JSON body with the schema MOVE_SCHEMA.
+
+    TODO: Why is this route not a POST to /drop_token/<game_id>/moves?
     """
     game = _get_game(game_id)
     player = _get_player(player_id)
@@ -192,7 +202,10 @@ class ClientError(Exception):
     Wrap another exception to signal that this is a client error.
     """
     def __init__(self, error, status_code=400):
-        self.args = error.args
+        if isinstance(error, Exception):
+            self.args = error.args
+        else:
+            self.args = (error)
         self.status_code = status_code
 
 

@@ -111,5 +111,25 @@ def test_errorrz(client):
     res = client.delete(f'/drop_token/{game_id}/player2')
     assert res.status_code == 410
 
+    ## list moves
+    res = client.get(f'/drop_token/{game_id}/moves')
+    print(res.json)
+    assert 'moves' in res.json
+
     ## list moves with bad start / until query params
+    res = client.get(f'/drop_token/{game_id}/moves?start=990&until=999')
+    assert 'moves' in res.json
+    assert res.json['moves'] == []
+
+    res = client.get(f'/drop_token/{game_id}/moves?start=-10&until=999')
+    assert res.status_code == 404
+
+    res = client.get(f'/drop_token/{game_id}/moves?start=5&until=2')
+    assert res.status_code == 404
+
+    res = client.get(f'/drop_token/{game_id}/moves/-99')
+    assert res.status_code == 404
+
+    res = client.get(f'/drop_token/{game_id}/moves/999')
+    assert res.status_code == 404
 
